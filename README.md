@@ -2,5 +2,5 @@
 
 ## Fundamentos de Aplicaciones Web 
 
-Link del video: 
+Link del video: https://youtu.be/35H99VOyB7M
 
