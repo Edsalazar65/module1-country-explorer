@@ -92,7 +92,6 @@
   display: inline-block;
 }
 
-
 .dropbtn {
   background-color: #155dfc;
   color: white;
@@ -114,7 +113,6 @@
   text-align: left;
 }
 
-
 .dropdown-content label {
   display: flex;
   align-items: center;
@@ -127,7 +125,6 @@
   background-color: #f1f1f1;
 }
 
-
 .dropdown:hover .dropdown-content {
   display: block;
 }
@@ -135,7 +132,6 @@
 .dropdown:hover .dropbtn {
   background-color: #1447e6;
 }
-
 
 
 @utility favorite-btn {
