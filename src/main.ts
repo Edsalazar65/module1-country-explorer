@@ -35,6 +35,7 @@ import { searchCountries, ApiError } from './services/countryApi';
 import { renderCountryList } from './components/CountryCard';
 import { openModal } from './components/CountryModal';
 import { getRequiredElement, showElement, hideElement, onDOMReady, debounce } from './utils/dom';
+import { getFavorites, clearAllFavorites } from './utils/storage';
 
 // =============================================================================
 // ESTADO DE LA APLICACIÓN
@@ -67,12 +68,16 @@ let errorMessage: HTMLElement;
 let emptyState: HTMLElement;
 let noResultsState: HTMLElement;
 let countriesList: HTMLElement;
+let favoritesToggle: HTMLInputElement;
+let clearFavoritesBtn: HTMLButtonElement;
 
 /**
  * Inicializa las referencias a los elementos del DOM.
  * Se llama una vez cuando la aplicación arranca.
  */
 function initializeElements(): void {
+  favoritesToggle = getRequiredElement<HTMLInputElement>('#favoritesToggle');
+  clearFavoritesBtn = getRequiredElement<HTMLButtonElement>('#clearFavorites');
   searchInput = getRequiredElement<HTMLInputElement>('#searchInput');
   searchButton = getRequiredElement<HTMLButtonElement>('#searchButton');
   retryButton = getRequiredElement<HTMLButtonElement>('#retryButton');
@@ -82,6 +87,7 @@ function initializeElements(): void {
   emptyState = getRequiredElement<HTMLElement>('#emptyState');
   noResultsState = getRequiredElement<HTMLElement>('#noResultsState');
   countriesList = getRequiredElement<HTMLElement>('#countriesList');
+  
 }
 
 // =============================================================================
@@ -194,9 +200,10 @@ function filterByRegion(countries: Country[]): Country[] {
 
 async function handleSearch(): Promise<void> {
   const query = searchInput.value.trim();
+  const isFavoritesFilterActive = favoritesToggle.checked;
 
   // Si la búsqueda está vacía, volvemos al estado inicial
-  if (query.length === 0) {
+  if (query.length === 0 && !isFavoritesFilterActive) {
     render({ status: 'idle' });
     lastSearchQuery = '';
     return;
@@ -221,14 +228,21 @@ async function handleSearch(): Promise<void> {
     // Si la Promise se rechaza, el error se captura en el catch.
     // =========================================================================
     const countries = await searchCountries(query);
+    let finalDisplayList = filterByRegion(countries);
 
-    const filteredCountries = filterByRegion(countries);
+    if (favoritesToggle.checked) {
+      const favoriteList = getFavorites();
+      const favoriteCodes = new Set(favoriteList.map(f => f.cca3));
+      finalDisplayList = finalDisplayList.filter(c => favoriteCodes.has(c.cca3));
 
-    if (filteredCountries.length === 0) {
+    }
+    if (finalDisplayList.length === 0) {
       render({ status: 'empty' });
     } else {
-      render({ status: 'success', data: filteredCountries });
+      render({ status: 'success', data: finalDisplayList });
     }
+
+
   } catch (error) {
     // Determinamos el mensaje de error apropiado
     let message = 'Error desconocido al buscar países';
@@ -281,6 +295,19 @@ function setupEventListeners(): void {
   // El debounce retrasa la ejecución hasta que el usuario deja de escribir.
   // Esto evita hacer una petición por cada tecla presionada.
   // =========================================================================
+
+  favoritesToggle.addEventListener('change', () => {
+    lastSearchQuery = '';
+    void handleSearch(); 
+  });
+
+  clearFavoritesBtn.addEventListener('click', () => {
+    if (confirm('¿Borrar todos los favoritos?')) {
+      clearAllFavorites();
+      void handleSearch();
+    }
+  });
+
   const debouncedSearch = debounce(() => {
     void handleSearch();
   }, 400);
@@ -363,7 +390,6 @@ regions.forEach(region => {
     handleSearch();
   });
 });
-
 
 
 

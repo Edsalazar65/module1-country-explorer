@@ -15,7 +15,7 @@
 import type { Country } from '../types/country';
 import { formatNumber, formatCapitals } from '../utils/format';
 import { createElement } from '../utils/dom';
-
+import { isFavorite, saveToFavorites, removeFromFavorites } from '../utils/storage';
 /**
  * Crea una tarjeta de país para mostrar en la lista.
  *
@@ -111,8 +111,46 @@ export function createCountryCard(
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
       </div>
+
+      <button class="favorite-btn">
+        <svg 
+          class="heart-icon w-6 h-6 transition-all duration-200"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+        >
+          <path 
+            d="M12 21s-7-4.35-9.5-7.2C.9 11.7 1 8.9 3 7a5.4 5.4 0 017.5 0L12 8.4 13.5 7A5.4 5.4 0 0121 7c2 1.9 2.1 4.7.5 6.8C19 16.65 12 21 12 21z"
+            class="heart-path"
+          />
+        </svg>
+      </button>
+
+
     </div>
   `;
+
+
+  const favBtn = card.querySelector('.favorite-btn') as HTMLButtonElement;
+
+  if (isFavorite(country.cca3)) {
+    favBtn.classList.add('active');
+  }
+
+  favBtn.addEventListener('click', (e) => {
+  e.stopPropagation(); 
+
+  const isNowActive = favBtn.classList.toggle('active');
+
+  if (isNowActive) {
+    saveToFavorites(country);
+  } else {
+    removeFromFavorites(country.cca3);
+  }
+});
+
+  
 
   // =========================================================================
   // EVENT LISTENERS

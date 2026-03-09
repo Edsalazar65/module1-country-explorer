@@ -135,3 +135,26 @@
 .dropdown:hover .dropbtn {
   background-color: #1447e6;
 }
+
+
+
+@utility favorite-btn {
+  background: rgba(15, 23, 42, 0.6);
+  padding: 6px;
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+}
+
+.heart-icon {
+  color: red;
+}
+
+.favorite-btn:hover .heart-icon {
+  transform: scale(1.15);
+  color: red;
+}
+
+.favorite-btn.active .heart-icon {
+  fill: red;
+  transform: scale(1.2);
+}
